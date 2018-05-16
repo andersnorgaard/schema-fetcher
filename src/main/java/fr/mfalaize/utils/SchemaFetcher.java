@@ -35,7 +35,7 @@ public class SchemaFetcher {
      * @throws IOException
      * @throws URISyntaxException
      */
-    public static void main(String[] args) throws XPathExpressionException, IOException, URISyntaxException {
+    public static void main(String[] args) throws XPathExpressionException, Exception, URISyntaxException {
         if (args == null || args.length <= 1) {
             throw new IllegalArgumentException("Unexpected use of SchemaFetcher. You must provide root absolute path as first argument " +
                     "and schema URL next to it.");
@@ -49,7 +49,7 @@ public class SchemaFetcher {
         this.rootPath = rootPath;
     }
 
-    public void fetchAll(String... urls) throws IOException, XPathExpressionException, URISyntaxException {
+    public void fetchAll(String... urls) throws Exception, XPathExpressionException, URISyntaxException {
         for (String url : urls) {
             Schema schema = new Schema(new URL(url));
             schema.fetchAll();
@@ -93,12 +93,21 @@ public class SchemaFetcher {
         // Key = schemaLocation and value the include/import schema
         public Map<String, Schema> includesAndImports = new HashMap<>();
 
-        public Schema(URL url) throws URISyntaxException {
-            this.url = url;
+        public Schema(URL url) throws Exception {
+
+            if(url.toString().contains("digitaliser")){                
+                String newUrlString = url.toString().replaceFirst("^http:", "https:");    
+                    
+                this.url = new URL(newUrlString);
+                System.out.println("Changed " + url + " to " + this.url);
+            } else {
+                this.url = url;    
+            }
+            
             generateFileName();
         }
 
-        public void fetchAll() throws IOException, XPathExpressionException, URISyntaxException {
+        public void fetchAll() throws IOException, XPathExpressionException, Exception {
             System.out.println("Fetching " + url.toString());
 
             try (Scanner scanner = new Scanner(url.openStream(), StandardCharsets.UTF_8.name())) {
